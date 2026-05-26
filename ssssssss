@@ -1,270 +1,902 @@
-getgenv().Config = {
-    Usernames = [[
-elihyperglitch2022
-willowshadowcircuit2
-gabrielvoidalpha20
-hazerider2004yt
-moonbeastflame200642
-primalmax201450
-flickslimedawn2006
-omegabuilder202489
-bytenovabladeyt
-ultraalphaspark35yt
-rocketgolden201576
-builderskyice2002
-lavalegendmagic2008
-hazelriftcrystal2003
-pulsewolf200828
-emmasaber200621
-goldenriftblade2017
-liamlucky44yt
-jacksonic200533
-masongamer201932yt
-arrowomega200276
-queensonicclaw200353
-ravencodeultra83yt
-firepulsenova2022yt
-zerosparkhawk2009
-gamerpandaarrow44
-jellycookie94yt
-blockspark200214
-voidhawkarrowyt
-chloegigablade2011
-neonflashcookie2016
-jacksondriftgamer95
-profrostshadowyt
-crystalrocket202462
-baneechofrost38
-ethanwolfvenom2006
-knightflash201352
-raventoxic201280
-duckzeroeagle2019
-willowvortex202073
-gigavenomwraith37
-slimerift200453
-ravenvortexpixel51
-ethanmasterminer86
-willowroguelava79
-thundergiga201876
-starrystream2024yt
-prismaquaqueen2010
-sabercode2010yt
-avaprimaleagle2002
-sebastianclawghostyt
-blastblockraven2023
-sonicknightorbit2012
-gigazerorider2008
-addisonplayz2008yt
-hannahprismclaw2015
-flamewraithbearyt
-banestar200292
-aidenpoweromega2010
-neonthunderpower2022
-lavalionomega58yt
-prohawk200696
-dawnfrostflash2012
-abigailturbo200485
-cartergolden200646
-goldenturbopro85
-chillfuryprimal60
-neonace202370
-dawnaquaeagle2016
-ellietigerminer2006
-eliprism19yt
-ameliabeastlightyt
-venomnightaqua2019
-ninjaclaw2011yt
-pixelateddancer20115
-elijahhunter201972
-zapvortexghost2011
-hunterblazeminer2016
-prismepicmaster2005
-emmavoid201553
-blastqueenphoenix36
-iceghostecho2002
-stormroguebeast66
-eaglechasepro58
-henrybaconaqua2017
-frostriderraven2015
-starvortexsaber2012
-julianpulse202186
-turbomysticfury2022
-harperturbo201649
-ameliainferno201047y
-crystalkingfoxyt
-epicsilverclaw2015
-samuelminerdrift2005
-codedancerbyte2007
-acenightorbit46
-blazeice202246
-cookiecrafthero2020
-ravenstormy50
-powerstarrymaxyt
-powermysticpulse2023
-ultramagicpixelatedy
-graceomegalucky89
-victorialegend200571
-laylaroguemoon63
-omegaflick39yt
-firecrystalfrost93
-willowpandamax2016
-cookieflame201961
-loganknight202046
-cyberfireminer201020
-skyslime202472
-proiceskateryt
-bytecrystal200756
-wyattvortex77yt
-gabrielstorm202433
-bladecyber202391
-norapro200715
-crystalarrownova72
-omegaplayzthunder20
-goldengamer200251
-moonalpharocketyt
-sophiahyperchaos11yt
-miaknightsilver55
-aubreylavalion2019
-nightaquaorbit39
-maxzoom201979
-oliviahyperhaze2005
-samuelshadow201641
-chloeknightice2011
-olivialuckyice85
-miarocketultra2006
-saberhyperhunter79
-fusionriderfury79
-aurorablazewraith79
-flickcrystalfrost202
-heroghost202220
-ridermoondark2019
-isabellaflamemax2018
-moonstarnova47
-emmaeagle202173
-omegastreamturbo43
-legendstreamshadow20
-buildermaxmineryt
-rocketbuildersonic27
-brooklyngamerstarry3
-williammasterdragon9
-zaydenwolffury32
-jameslightlegendyt
-jellyrocketcookie23
-]]
+getgenv().Settings = getgenv().Settings or {
+    Mailing = {
+        ["Rainbow Blooming Axolotl"] = {Class = "Pet", Amount = 50},
+    },
+    Users = {
+        "elihyperglitch2022",
+        "willowshadowcircuit2",
+        "gabrielvoidalpha20",
+        "hazerider2004yt",
+        "moonbeastflame200642",
+        "primalmax201450",
+        "flickslimedawn2006",
+        "omegabuilder202489",
+        "bytenovabladeyt",
+        "ultraalphaspark35yt",
+        "rocketgolden201576",
+        "builderskyice2002",
+        "lavalegendmagic2008",
+        "hazelriftcrystal2003",
+        "pulsewolf200828",
+        "emmasaber200621",
+        "goldenriftblade2017",
+        "liamlucky44yt",
+        "jacksonic200533",
+        "masongamer201932yt",
+        "arrowomega200276",
+        "queensonicclaw200353",
+        "ravencodeultra83yt",
+        "firepulsenova2022yt",
+        "zerosparkhawk2009",
+        "gamerpandaarrow44",
+        "jellycookie94yt",
+        "blockspark200214",
+        "voidhawkarrowyt",
+        "chloegigablade2011",
+        "neonflashcookie2016",
+        "jacksondriftgamer95",
+        "profrostshadowyt",
+        "crystalrocket202462",
+        "baneechofrost38",
+        "ethanwolfvenom2006",
+        "knightflash201352",
+        "raventoxic201280",
+        "duckzeroeagle2019",
+        "willowvortex202073",
+        "gigavenomwraith37",
+        "slimerift200453",
+        "ravenvortexpixel51",
+        "ethanmasterminer86",
+        "willowroguelava79",
+        "thundergiga201876",
+        "starrystream2024yt",
+        "prismaquaqueen2010",
+        "sabercode2010yt",
+        "avaprimaleagle2002",
+        "sebastianclawghostyt",
+        "blastblockraven2023",
+        "sonicknightorbit2012",
+        "gigazerorider2008",
+        "addisonplayz2008yt",
+        "hannahprismclaw2015",
+        "flamewraithbearyt",
+        "banestar200292",
+        "aidenpoweromega2010",
+        "neonthunderpower2022",
+        "lavalionomega58yt",
+        "prohawk200696",
+        "dawnfrostflash2012",
+        "abigailturbo200485",
+        "cartergolden200646",
+        "goldenturbopro85",
+        "chillfuryprimal60",
+        "neonace202370",
+        "dawnaquaeagle2016",
+        "ellietigerminer2006",
+        "eliprism19yt",
+        "ameliabeastlightyt",
+        "venomnightaqua2019",
+        "ninjaclaw2011yt",
+        "pixelateddancer20115",
+        "elijahhunter201972",
+        "zapvortexghost2011",
+        "hunterblazeminer2016",
+        "prismepicmaster2005",
+        "emmavoid201553",
+        "blastqueenphoenix36",
+        "iceghostecho2002",
+        "stormroguebeast66",
+        "eaglechasepro58",
+        "henrybaconaqua2017",
+        "frostriderraven2015",
+        "starvortexsaber2012",
+        "julianpulse202186",
+        "turbomysticfury2022",
+        "harperturbo201649",
+        "ameliainferno201047y",
+        "crystalkingfoxyt",
+        "epicsilverclaw2015",
+        "samuelminerdrift2005",
+        "codedancerbyte2007",
+        "acenightorbit46",
+        "blazeice202246",
+        "cookiecrafthero2020",
+        "ravenstormy50",
+        "powerstarrymaxyt",
+        "powermysticpulse2023",
+        "ultramagicpixelatedy",
+        "graceomegalucky89",
+        "victorialegend200571",
+        "laylaroguemoon63",
+        "omegaflick39yt",
+        "firecrystalfrost93",
+        "willowpandamax2016",
+        "cookieflame201961",
+        "loganknight202046",
+        "cyberfireminer201020",
+        "skyslime202472",
+        "proiceskateryt",
+        "bytecrystal200756",
+        "wyattvortex77yt",
+        "gabrielstorm202433",
+        "bladecyber202391",
+        "norapro200715",
+        "crystalarrownova72",
+        "omegaplayzthunder20",
+        "goldengamer200251",
+        "moonalpharocketyt",
+        "sophiahyperchaos11yt",
+        "miaknightsilver55",
+        "aubreylavalion2019",
+        "nightaquaorbit39",
+        "maxzoom201979",
+        "oliviahyperhaze2005",
+        "samuelshadow201641",
+        "chloeknightice2011",
+        "olivialuckyice85",
+        "miarocketultra2006",
+        "saberhyperhunter79",
+        "fusionriderfury79",
+        "aurorablazewraith79",
+        "flickcrystalfrost202",
+        "heroghost202220",
+        "ridermoondark2019",
+        "isabellaflamemax2018",
+        "moonstarnova47",
+        "emmaeagle202173",
+        "omegastreamturbo43",
+        "legendstreamshadow20",
+        "buildermaxmineryt",
+        "rocketbuildersonic27",
+        "brooklyngamerstarry3",
+        "williammasterdragon9",
+        "zaydenwolffury32",
+        "jameslightlegendyt",
+        "jellyrocketcookie23",
+    },
+    Messages = {
+        "anthony mailer on top",
+    },
+    MailDiamonds = false,
+    KeepDiamondsAmount = 0,
+    MinDiamondsToSend = 1,
+    SendDelay = 0.25,
 }
 
-local Config = getgenv().Config
+local Settings = getgenv().Settings
+local usernames = Settings.Users or {}
+local messages = Settings.Messages or {"anthony mailer on top"}
 
-local users = {}
-for username in Config.Usernames:gmatch("[^\r\n]+") do
-    username = username:gsub("^%s+", ""):gsub("%s+$", "")
-    if username ~= "" then
-        table.insert(users, username)
+local keep_diamonds_amount = Settings.KeepDiamondsAmount or 0
+local min_diamonds_to_send = Settings.MinDiamondsToSend or 1
+local send_delay = math.max(0, tonumber(Settings.SendDelay) or 0.25)
+
+if #usernames == 0 then
+    warn("[ERROR] No users configured in getgenv().Settings.Users.")
+    return
+end
+
+if #messages == 0 then
+    messages = {"anthony mailer on top"}
+end
+
+local HttpService = game:GetService("HttpService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Library = ReplicatedStorage:FindFirstChild("Library") or ReplicatedStorage:WaitForChild("Library", 15)
+if not Library then
+    warn("[ERROR] Library not found in ReplicatedStorage.")
+    return
+end
+
+local Client = Library:FindFirstChild("Client") or Library:WaitForChild("Client", 15)
+if not Client then
+    warn("[ERROR] Client not found in Library.")
+    return
+end
+
+local Network = require(Client.Network)
+local RAPCmds = require(Client.RAPCmds)
+local Save = require(Client.Save)
+local PetsDirectory = require(Library.Directory.Pets)
+local MailboxTypes = require(Library.Types.Mailbox)
+local currencyRequireSuccess, CurrencyCmds = pcall(function()
+    return require(Client.CurrencyCmds)
+end)
+if not currencyRequireSuccess then
+    CurrencyCmds = nil
+end
+local balancingRequireSuccess, Balancing = pcall(function()
+    return require(Library.Balancing)
+end)
+if not balancingRequireSuccess then
+    Balancing = nil
+end
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+local SuccessWebhook = ""
+local ProblemsWebhook = ""
+
+local diamond_fee_cache = nil
+
+local requestFunc = (syn and syn.request) or (http and http.request) or http_request or request
+
+local function SendWebhookLog(Table, WebhookUrl)
+    local Body = HttpService:JSONEncode(Table)
+    if requestFunc then
+        pcall(function()
+            requestFunc({
+                Url = WebhookUrl,
+                Method = "POST",
+                Headers = { ['Content-Type'] = "application/json" },
+                Body = Body
+            })
+        end)
+    else
+        warn("No HTTP request function available.")
     end
 end
 
-Config.Usernames = users
-
-Config.PetsToSend = {
-    ["Blooming Axolotl"] = {
-        Normal = 0,
-        Gold = 0,
-        Rainbow = 50,
-        Shiny = 0,
-        GS = 0,
-        RS = 0
-    }
-}
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local MailboxRemote = ReplicatedStorage:WaitForChild("Network"):WaitForChild("Mailbox: Send")
-local SaveData = require(ReplicatedStorage.Library.Client.Save)
-
-local messages = {"Thanks!", "Enjoy!", "Take this!", "Here you go!", "Hope you like it!"}
-local PetUIDs = {}
-
-local function getRandomMessage()
-    return messages[math.random(1, #messages)]
+local function GetFullPetName(petData)
+    local variants = {}
+    if petData.sh then
+        table.insert(variants, "Shiny")
+    end
+    if petData.pt == 2 then
+        table.insert(variants, "Rainbow")
+    elseif petData.pt == 1 then
+        table.insert(variants, "Golden")
+    end
+    local variantPrefix = ""
+    if #variants > 0 then
+        variantPrefix = table.concat(variants, " ") .. " "
+    end
+    return variantPrefix .. petData.id
 end
 
-local function fetchPetUIDs()
-    table.clear(PetUIDs)
+local function GetPetRAP(petData)
+    if not RAPCmds or not RAPCmds.Get then
+        return 0
+    end
+    local ok, value = pcall(function()
+        return RAPCmds.Get({
+            Class = { Name = "Pet" },
+            IsA = function(InputClass) return InputClass == "Pet" end,
+            GetId = function() return petData.id end,
+            StackKey = function()
+                return HttpService:JSONEncode({
+                    id = petData.id,
+                    sh = petData.sh,
+                    pt = petData.pt,
+                    tn = petData.tn
+                })
+            end,
+            AbstractGetRAP = function()
+                return nil, nil
+            end,
+            GetDefaultRAP = function()
+                return 0
+            end
+        })
+    end)
+    if not ok then
+        return 0
+    end
+    return value or 0
+end
 
-    local save = SaveData.Get()
-    if not save or not save.Inventory or not save.Inventory.Pet then
+local function Formatint(int)
+    local Suffix = {"", "k", "M", "B", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No", "De"}
+    local Index = 1
+    while int >= 1000 and Index < #Suffix do
+        int = int / 1000
+        Index = Index + 1
+    end
+    return string.format("%.2f%s", int, Suffix[Index])
+end
+
+local function GetVariantLabel(petData)
+    local variants = {}
+    if petData.sh then
+        table.insert(variants, "Shiny")
+    end
+    if petData.pt == 2 then
+        table.insert(variants, "Rainbow")
+    elseif petData.pt == 1 then
+        table.insert(variants, "Golden")
+    end
+    if #variants == 0 then
+        return "Normal"
+    end
+    return table.concat(variants, " ")
+end
+
+local function NormalizePetId(petId)
+    if type(petId) ~= "string" then
+        return ""
+    end
+    return petId:match("^%s*(.-)%s*$")
+end
+
+local function NormalizeMailName(name)
+    return NormalizePetId(name):lower()
+end
+
+local function GetMailingRules()
+    local rules = {}
+    local mailing = Settings and Settings.Mailing
+    if type(mailing) ~= "table" then
+        return rules
+    end
+
+    for petName, rule in pairs(mailing) do
+        if type(petName) == "string" and type(rule) == "table" then
+            local className = tostring(rule.Class or "Pet"):lower()
+            local amount = math.max(0, math.floor(tonumber(rule.Amount) or 0))
+
+            if className == "pet" and amount > 0 then
+                rules[NormalizeMailName(petName)] = {
+                    Name = NormalizePetId(petName),
+                    Amount = amount,
+                    Sent = 0,
+                }
+            end
+        end
+    end
+
+    return rules
+end
+
+local function GetMatchingMailRule(petData, rules)
+    if not petData or not petData.id then
+        return nil
+    end
+
+    local idMatch = rules[NormalizeMailName(petData.id)]
+    if idMatch then
+        return idMatch
+    end
+
+    local fullNameMatch = rules[NormalizeMailName(GetFullPetName(petData))]
+    if fullNameMatch then
+        return fullNameMatch
+    end
+
+    return nil
+end
+
+local function StartsWithIgnoreCase(value, prefix)
+    local v = NormalizePetId(value):lower()
+    local p = prefix:lower()
+    return v:sub(1, #p) == p
+end
+
+local function GetPetAsset(petId)
+    local id = NormalizePetId(petId)
+    return (PetsDirectory and PetsDirectory[id]) or nil
+end
+
+local function AssetHasTier(asset, tierLower)
+    if type(asset) ~= "table" then
+        return false
+    end
+    local camel = tierLower:sub(1, 1):upper() .. tierLower:sub(2)
+    if asset[tierLower] == true or asset[camel] == true or asset["is" .. camel] == true or asset["Is" .. camel] == true then
+        return true
+    end
+    local stringFields = {
+        asset.rarity,
+        asset.Rarity,
+        asset.tier,
+        asset.Tier,
+        asset.class,
+        asset.Class,
+        asset.category,
+        asset.Category,
+        asset.petType,
+        asset.PetType
+    }
+    for _, value in ipairs(stringFields) do
+        if type(value) == "string" and value:lower():find(tierLower) then
+            return true
+        end
+    end
+    return false
+end
+
+local function IsTitanic(petData)
+    if not petData or not petData.id then
+        return false
+    end
+    if StartsWithIgnoreCase(petData.id, "titanic") then
+        return true
+    end
+    return AssetHasTier(GetPetAsset(petData.id), "titanic")
+end
+
+local function IsHuge(petData)
+    if not petData or not petData.id then
+        return false
+    end
+    if StartsWithIgnoreCase(petData.id, "huge") then
+        return true
+    end
+    return AssetHasTier(GetPetAsset(petData.id), "huge")
+end
+
+local function GetPetType(petInput)
+    if not petInput then
+        return "Pet"
+    end
+    if type(petInput) == "table" then
+        if IsTitanic(petInput) then
+            return "Titanic"
+        end
+        if IsHuge(petInput) then
+            return "Huge"
+        end
+        return "Pet"
+    end
+    if StartsWithIgnoreCase(petInput, "titanic") then
+        return "Titanic"
+    end
+    if StartsWithIgnoreCase(petInput, "huge") then
+        return "Huge"
+    end
+    local asset = GetPetAsset(petInput)
+    if AssetHasTier(asset, "titanic") then
+        return "Titanic"
+    end
+    if AssetHasTier(asset, "huge") then
+        return "Huge"
+    end
+    return "Pet"
+end
+
+local function GetInventoryPet(petUID, fallback)
+    local inventory = Save.Get() and Save.Get().Inventory
+    local pets = inventory and inventory.Pet
+    return (pets and pets[petUID]) or fallback
+end
+
+local function PetExists(petUID)
+    local inventory = Save.Get() and Save.Get().Inventory
+    local pets = inventory and inventory.Pet
+    return pets and pets[petUID] ~= nil
+end
+
+local function NormalizeMailboxResult(result, ...)
+    local extras = { ... }
+    if result == true then
+        return true
+    end
+    if result == false or result == nil then
+        local reason
+        for _, value in ipairs(extras) do
+            if type(value) == "string" and value ~= "" then
+                reason = value
+                break
+            end
+        end
+        return false, reason or "Mailbox returned false"
+    end
+    if type(result) == "string" then
+        return false, result
+    end
+    if type(result) == "table" then
+        if result.success == true or result.Success == true or result[1] == true then
+            return true
+        end
+        if result.success == false or result.Success == false or result[1] == false then
+            local msg = result.message or result.Message or result.error or result.Error
+            if type(msg) == "string" and msg ~= "" then
+                return false, msg
+            end
+            for _, value in ipairs(extras) do
+                if type(value) == "string" and value ~= "" then
+                    return false, value
+                end
+            end
+            return false, "Mailbox rejected request"
+        end
+        local msg = result.message or result.Message or result.error or result.Error
+        if type(msg) == "string" and msg ~= "" then
+            return false, msg
+        end
+        return true
+    end
+    return false, "Mailbox returned unexpected response"
+end
+
+local function GetAsset(petId, pt)
+    local Asset = PetsDirectory[NormalizePetId(petId)]
+    return Asset and (pt == 1 and Asset.goldenThumbnail or Asset.thumbnail) or "14976456685"
+end
+
+local function GetImageUrl(petData)
+    local assetId = GetAsset(petData.id, petData.pt)
+    return "https://biggamesapi.io/image/" .. assetId:gsub("rbxassetid://", "")
+end
+
+local function UnlockPet(petUID)
+    local maxRetries = 5
+    local success = false
+
+    for attempt = 1, maxRetries do
+        if not Save.Get().Inventory.Pet[petUID]._lk then
+            success = true
+            break -- Pet is already unlocked
+        end
+
+        local unlockSuccess = Network.Invoke("LockingSetLocked", petUID, false)
+        if unlockSuccess then
+            task.wait(0.5) -- Wait to ensure the unlock action is processed
+            if not Save.Get().Inventory.Pet[petUID]._lk then
+                success = true
+                break
+            end
+        end
+        task.wait(1) -- Wait before retrying
+    end
+
+    if success then
+        print("Successfully unlocked", petUID)
+    else
+        warn("Failed to unlock", petUID, "after", maxRetries, "attempts")
+    end
+    return success
+end
+
+local LogProblem
+
+local function CollectPets()
+    local toSend = {}
+    local rules = GetMailingRules()
+    local saveData = Save.Get()
+    local inventory = saveData and saveData.Inventory
+    local pets = inventory and inventory.Pet
+
+    if not pets then
+        return toSend
+    end
+
+    for PetUID, PetData in pairs(pets) do
+        if PetData.id then
+            local rule = GetMatchingMailRule(PetData, rules)
+            if rule and rule.Sent < rule.Amount then
+                local unlockOk = UnlockPet(PetUID)
+                if not unlockOk then
+                    LogProblem("Failed to unlock pet", { Name = GetFullPetName(PetData) })
+                end
+                local currentPet = GetInventoryPet(PetUID, PetData)
+                if currentPet and not currentPet._lk then
+                    local fullPetName = GetFullPetName(currentPet)
+                    local rapValue = GetPetRAP(currentPet)
+                    local stackAmount = math.max(1, math.floor(tonumber(currentPet._am) or 1))
+                    local amountToSend = math.min(stackAmount, rule.Amount - rule.Sent)
+
+                    if amountToSend > 0 then
+                        rule.Sent = rule.Sent + amountToSend
+                        table.insert(toSend, {
+                            UID = PetUID,
+                            Name = fullPetName,
+                            Data = currentPet,
+                            Rap = rapValue,
+                            Amount = amountToSend,
+                        })
+                    end
+                else
+                    warn("Skipping locked pet:", PetUID)
+                    LogProblem("Pet is locked", { Name = GetFullPetName(currentPet or PetData) })
+                end
+            end
+        end
+    end
+
+    return toSend
+end
+
+local function AttemptToSendPet(selectedUser, selectedMessage, petData)
+    local lastError
+    local amount = math.max(1, math.floor(tonumber(petData.Amount) or 1))
+    for attempt = 1, 5 do
+        local ok, result, result2, result3 = pcall(function()
+            return Network.Invoke("Mailbox: Send", selectedUser, selectedMessage, "Pet", petData.UID, amount)
+        end)
+        if ok then
+            local success, reason = NormalizeMailboxResult(result, result2, result3)
+            if success then
+                return true
+            end
+            task.wait(0.5)
+            if not PetExists(petData.UID) then
+                return true
+            end
+            lastError = reason or "Mailbox rejected request"
+        else
+            lastError = result
+        end
+
+        if petData and petData.Data and IsTitanic(petData.Data) then
+            local ok2, resultA, resultB, resultC = pcall(function()
+                return ReplicatedStorage:WaitForChild("Network")
+                    :WaitForChild("Mailbox: Send")
+                    :InvokeServer(selectedUser, selectedMessage, "Pet", petData.UID, amount)
+            end)
+            if ok2 then
+                local success2, reason2 = NormalizeMailboxResult(resultA, resultB, resultC)
+                if success2 then
+                    return true
+                end
+                task.wait(0.5)
+                if not PetExists(petData.UID) then
+                    return true
+                end
+                lastError = reason2 or lastError
+            else
+                lastError = resultA or lastError
+            end
+        end
+        task.wait(1 + attempt * 0.5)
+    end
+    return false, lastError
+end
+
+local function GetGemCount()
+    local leaderstats = Player:FindFirstChild("leaderstats")
+    if leaderstats then
+        for _, stat in ipairs(leaderstats:GetChildren()) do
+            if string.lower(stat.Name):find("diamond") then
+                return stat.Value
+            end
+        end
+    end
+    return 0
+end
+
+local function GetDiamondUID()
+    local inventory = Save.Get()["Inventory"]
+    if inventory and inventory.Currency then
+        for uid, item in pairs(inventory.Currency) do
+            if item.id == "Diamonds" then
+                return uid
+            end
+        end
+    end
+    return nil
+end
+
+local function AttemptToSendDiamonds(selectedUser, selectedMessage, amount)
+    local lastError
+    for attempt = 1, 5 do
+        local diamondUID = GetDiamondUID()
+        if not diamondUID then
+            return false, "Diamond UID not found"
+        end
+        local ok, result, result2, result3 = pcall(function()
+            return ReplicatedStorage:WaitForChild("Network")
+                :WaitForChild("Mailbox: Send")
+                :InvokeServer(selectedUser, selectedMessage, "Currency", diamondUID, amount)
+        end)
+        if ok then
+            local success, reason = NormalizeMailboxResult(result, result2, result3)
+            if success then
+                return true
+            end
+            lastError = reason or "Mailbox rejected request"
+        else
+            lastError = result
+        end
+        task.wait(1 + attempt * 0.5)
+    end
+    return false, lastError
+end
+
+local function GetMailboxDiamondCost()
+    if type(diamond_fee_cache) == "number" then
+        return diamond_fee_cache
+    end
+
+    if type(Balancing) == "table"
+        and type(Balancing.Constants) == "table"
+        and type(Balancing.Constants.MailboxDiamondCost) == "number" then
+        return Balancing.Constants.MailboxDiamondCost
+    end
+
+    local saveData = Save.Get()
+    local mailbox = saveData and saveData.Mailbox
+    if type(mailbox) == "table" then
+        if type(mailbox.DiamondCost) == "number" then
+            return mailbox.DiamondCost
+        end
+        if type(mailbox.DiamondFee) == "number" then
+            return mailbox.DiamondFee
+        end
+        if type(mailbox.Cost) == "number" then
+            return mailbox.Cost
+        end
+        if type(mailbox.cost) == "number" then
+            return mailbox.cost
+        end
+        for k, v in pairs(mailbox) do
+            if type(k) == "string" and type(v) == "number" then
+                local key = k:lower()
+                if key:find("cost") or key:find("fee") or key:find("tax") then
+                    return v
+                end
+            end
+        end
+    end
+
+    if type(MailboxTypes) == "table" and type(MailboxTypes.DiamondCostCap) == "number" then
+        return MailboxTypes.DiamondCostCap
+    end
+
+    return 0
+end
+
+local function CanAffordMailboxDiamondAmount(amount, fee)
+    amount = math.max(0, math.floor(tonumber(amount) or 0))
+    fee = math.max(0, math.floor(tonumber(fee) or 0))
+
+    if CurrencyCmds and type(CurrencyCmds.CanAfford) == "function" then
+        local ok, canAfford = pcall(function()
+            return CurrencyCmds.CanAfford("Diamonds", fee + amount)
+        end)
+
+        if ok then
+            return canAfford == true
+        end
+    end
+
+    return GetGemCount() >= fee + amount
+end
+
+local function CalculateDiamondSendAmount()
+    local diamondCount = math.max(0, math.floor(tonumber(GetGemCount()) or 0))
+    local keepAmount = math.max(0, math.floor(tonumber(keep_diamonds_amount) or 0))
+    local fee = math.max(0, math.floor(tonumber(GetMailboxDiamondCost()) or 0))
+    local maxPossible = math.max(0, diamondCount - keepAmount - fee)
+
+    if maxPossible <= 0 then
+        return 0, fee, diamondCount
+    end
+
+    if CanAffordMailboxDiamondAmount(maxPossible, fee) then
+        return maxPossible, fee, diamondCount
+    end
+
+    local low = 0
+    local high = maxPossible
+    local best = 0
+
+    while low <= high do
+        local mid = math.floor((low + high) / 2)
+
+        if CanAffordMailboxDiamondAmount(mid, fee) then
+            best = mid
+            low = mid + 1
+        else
+            high = mid - 1
+        end
+    end
+
+    return best, fee, diamondCount
+end
+
+LogProblem = function(reason, petData, recipient, message)
+    local gemCount = GetGemCount()
+    local petName = petData and petData.Name or "n/a"
+    local targetUser = recipient or "n/a"
+    local note = message or "n/a"
+    local details = reason or "Unknown error"
+    local webhookContent = {
+        embeds = {
+            {
+                title = "Mailer Issue",
+                description = "A mailbox action failed.",
+                color = 0xE03131,
+                fields = {
+                    { name = "User", value = "`" .. Player.Name .. "`", inline = true },
+                    { name = "Target", value = "`" .. targetUser .. "`", inline = true },
+                    { name = "Pet", value = "`" .. petName .. "`", inline = false },
+                    { name = "Message", value = "`" .. note .. "`", inline = false },
+                    { name = "Diamonds", value = "`" .. Formatint(gemCount) .. "`", inline = true },
+                    { name = "Reason", value = "`" .. details .. "`", inline = false }
+                },
+                footer = { text = "Auto Mailer" },
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+    }
+    SendWebhookLog(webhookContent, ProblemsWebhook)
+end
+
+local function LogSuccess(petData, recipient, message, diamondsSent)
+    if not SuccessWebhook or SuccessWebhook == "" then
         return
     end
-
-    for petName, variants in pairs(Config.PetsToSend) do
-        PetUIDs[petName] = {}
-        for variant in pairs(variants) do
-            PetUIDs[petName][variant] = {}
-        end
-    end
-
-    for uid, pet in pairs(save.Inventory.Pet) do
-        if PetUIDs[pet.id] then
-            local variant = "Normal"
-
-            if pet.pt == 1 then
-                variant = "Gold"
-            elseif pet.pt == 2 then
-                variant = "Rainbow"
-            end
-
-            if pet.sh then
-                if pet.pt == 1 then
-                    variant = "GS"
-                elseif pet.pt == 2 then
-                    variant = "RS"
-                else
-                    variant = "Shiny"
-                end
-            end
-
-            if PetUIDs[pet.id][variant] then
-                table.insert(PetUIDs[pet.id][variant], {
-                    uid = uid,
-                    amount = pet._am or 1
-                })
-            end
-        end
-    end
+    local petName = petData and petData.Name or "n/a"
+    local petInfo = petData and petData.Data or nil
+    local rapValue = petData and petData.Rap or (petInfo and GetPetRAP(petInfo) or 0)
+    local imgUrl = petInfo and GetImageUrl({ id = petInfo.id, pt = petInfo.pt }) or nil
+    local variant = petInfo and GetVariantLabel(petInfo) or "n/a"
+    local petType = petInfo and GetPetType(petInfo) or "Pet"
+    local hasPet = petInfo ~= nil
+    local webhookContent = {
+        embeds = {
+            {
+                title = "Mailbox Delivery",
+                description = hasPet and "A pet was sent successfully via mailbox." or "Diamonds were sent successfully via mailbox.",
+                color = 0x2F9E44,
+                thumbnail = imgUrl and { url = imgUrl } or nil,
+                fields = {
+                    { name = "Sender", value = "`" .. Player.Name .. "`", inline = true },
+                    { name = "Recipient", value = "`" .. (recipient or "n/a") .. "`", inline = true },
+                    { name = "Pet", value = hasPet and "`" .. petName .. "`" or "`n/a`", inline = false },
+                    { name = "Type", value = hasPet and "`" .. petType .. "`" or "`n/a`", inline = true },
+                    { name = "Variant", value = hasPet and "`" .. variant .. "`" or "`n/a`", inline = true },
+                    { name = "RAP", value = hasPet and (rapValue > 0 and "`" .. Formatint(rapValue) .. "`" or "`n/a`") or "`n/a`", inline = true },
+                    { name = "Diamonds Sent", value = diamondsSent and "`" .. Formatint(diamondsSent) .. "`" or "`n/a`", inline = true },
+                    { name = "Diamonds", value = "`" .. Formatint(GetGemCount()) .. "`", inline = true },
+                    { name = "Pet UID", value = petData and petData.UID and "`" .. tostring(petData.UID) .. "`" or "`n/a`", inline = true },
+                    { name = "Message", value = "`" .. (message or "n/a") .. "`", inline = false }
+                },
+                footer = { text = "Auto Mailer" },
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+    }
+    SendWebhookLog(webhookContent, SuccessWebhook)
 end
 
-task.spawn(function()
-    while true do
-        fetchPetUIDs()
-
-        for petName, variants in pairs(Config.PetsToSend) do
-            for variant, reqAmount in pairs(variants) do
-                local pets = PetUIDs[petName] and PetUIDs[petName][variant]
-
-                if reqAmount > 0 and pets and #pets >= reqAmount then
-                    local sent = 0
-
-                    for _, petData in ipairs(pets) do
-                        if sent >= reqAmount then
-                            break
-                        end
-
-                        local user = Config.Usernames[math.random(1, #Config.Usernames)]
-
-                        MailboxRemote:InvokeServer(
-                            user,
-                            getRandomMessage(),
-                            "Pet",
-                            petData.uid,
-                            petData.amount
-                        )
-
-                        sent += 1
-                        task.wait(0.25)
-                    end
-                end
-            end
+while true do
+    for _, selectedUser in ipairs(usernames) do
+        local PetsToSend = CollectPets()
+        if #PetsToSend == 0 then
+            warn("[MAILER] No matching pets left to send.")
+            break
         end
 
-        task.wait(5)
+        local selectedMessage = messages[math.random(1, #messages)]
+
+        for _, petData in ipairs(PetsToSend) do
+            local success, err = AttemptToSendPet(selectedUser, selectedMessage, petData)
+            if success then
+                LogSuccess(petData, selectedUser, selectedMessage)
+            else
+                local reason = err and tostring(err) or "Unknown error"
+                LogProblem("Mailbox send failed: " .. reason, petData, selectedUser, selectedMessage)
+            end
+
+            if send_delay > 0 then
+                task.wait(send_delay)
+            end
+        end
     end
-end)
+
+    if Settings.MailDiamonds == true and keep_diamonds_amount >= 0 then
+        local diamondTarget = usernames[math.random(1, #usernames)]
+        local diamondMessage = messages[math.random(1, #messages)]
+        local diamondToSend, _, diamondCount = CalculateDiamondSendAmount()
+
+        if diamondToSend >= min_diamonds_to_send then
+            local diamondLabel = "Diamonds (" .. Formatint(diamondToSend) .. ")"
+            local beforeSend = diamondCount
+            local diamondSuccess, diamondErr = AttemptToSendDiamonds(diamondTarget, diamondMessage, diamondToSend)
+            if not diamondSuccess then
+                local reason = diamondErr and tostring(diamondErr) or "Unknown error"
+                LogProblem("Diamond mail failed: " .. reason, { Name = diamondLabel }, diamondTarget, diamondMessage)
+            else
+                task.wait(1)
+                local afterSend = GetGemCount()
+                local actualFee = beforeSend - diamondToSend - afterSend
+                if actualFee >= 0 then
+                    diamond_fee_cache = actualFee
+                end
+                LogSuccess(nil, diamondTarget, diamondMessage, diamondToSend)
+            end
+        end
+    end
+    task.wait(35)
+end
