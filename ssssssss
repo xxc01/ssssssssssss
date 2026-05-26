@@ -157,189 +157,442 @@ getgenv().Settings = getgenv().Settings or {
     Messages = {
         "anthony mailer on top",
     },
-    MailDiamonds = false,
-    KeepDiamondsAmount = 0,
-    MinDiamondsToSend = 1,
     SendDelay = 0.25,
+    MaxRetries = 5,
 }
 
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
 local Settings = getgenv().Settings
-local usernames = Settings.Users or {}
-local messages = Settings.Messages or {"anthony mailer on top"}
+local Users = Settings.Users or {}
+local Messages = Settings.Messages or {"anthony mailer on top"}
+local SendDelay = math.max(0, tonumber(Settings.SendDelay) or 0.25)
+local MaxRetries = math.max(1, math.floor(tonumber(Settings.MaxRetries) or 5))
 
-local keep_diamonds_amount = Settings.KeepDiamondsAmount or 0
-local min_diamonds_to_send = Settings.MinDiamondsToSend or 1
-local send_delay = math.max(0, tonumber(Settings.SendDelay) or 0.25)
-
-if #usernames == 0 then
-    warn("[ERROR] No users configured in getgenv().Settings.Users.")
+if #Users == 0 then
+    warn("[MAILER] No users configured.")
     return
 end
 
-if #messages == 0 then
-    messages = {"anthony mailer on top"}
+if #Messages == 0 then
+    Messages = {"anthony mailer on top"}
 end
 
-local HttpService = game:GetService("HttpService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Library = ReplicatedStorage:FindFirstChild("Library") or ReplicatedStorage:WaitForChild("Library", 15)
-if not Library then
-    warn("[ERROR] Library not found in ReplicatedStorage.")
-    return
-end
-
-local Client = Library:FindFirstChild("Client") or Library:WaitForChild("Client", 15)
-if not Client then
-    warn("[ERROR] Client not found in Library.")
-    return
-end
-
-local Network = require(Client.Network)
-local RAPCmds = require(Client.RAPCmds)
-local Save = require(Client.Save)
-local PetsDirectory = require(Library.Directory.Pets)
-local MailboxTypes = require(Library.Types.Mailbox)
-local currencyRequireSuccess, CurrencyCmds = pcall(function()
-    return require(Client.CurrencyCmds)
-end)
-if not currencyRequireSuccess then
-    CurrencyCmds = nil
-end
-local balancingRequireSuccess, Balancing = pcall(function()
-    return require(Library.Balancing)
-end)
-if not balancingRequireSuccess then
-    Balancing = nil
-end
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
-local SuccessWebhook = ""
-local ProblemsWebhook = ""
+local function CreateStatusGui()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "AnthonyMailerStatus"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local diamond_fee_cache = nil
+    local ok = pcall(function()
+        screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    end)
 
-local requestFunc = (syn and syn.request) or (http and http.request) or http_request or request
-
-local function SendWebhookLog(Table, WebhookUrl)
-    local Body = HttpService:JSONEncode(Table)
-    if requestFunc then
-        pcall(function()
-            requestFunc({
-                Url = WebhookUrl,
-                Method = "POST",
-                Headers = { ['Content-Type'] = "application/json" },
-                Body = Body
-            })
-        end)
-    else
-        warn("No HTTP request function available.")
+    if not ok then
+        screenGui.Parent = game:GetService("CoreGui")
     end
+
+    local main = Instance.new("Frame")
+    main.Name = "Main"
+    main.Size = UDim2.fromOffset(410, 395)
+    main.Position = UDim2.new(0, 24, 0.5, -198)
+    main.BackgroundColor3 = Color3.fromRGB(12, 16, 24)
+    main.BorderSizePixel = 0
+    main.Parent = screenGui
+
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 10)
+    mainCorner.Parent = main
+
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(58, 170, 255)
+    stroke.Thickness = 1
+    stroke.Transparency = 0.25
+    stroke.Parent = main
+
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Size = UDim2.new(1, 0, 0, 44)
+    header.BackgroundColor3 = Color3.fromRGB(18, 26, 39)
+    header.BorderSizePixel = 0
+    header.Parent = main
+
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 10)
+    headerCorner.Parent = header
+
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Size = UDim2.new(1, -54, 1, 0)
+    title.Position = UDim2.fromOffset(14, 0)
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.Text = "Mailbox Status"
+    title.TextColor3 = Color3.fromRGB(240, 247, 255)
+    title.TextSize = 17
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Parent = header
+
+    local close = Instance.new("TextButton")
+    close.Name = "Close"
+    close.Size = UDim2.fromOffset(30, 30)
+    close.Position = UDim2.new(1, -38, 0, 7)
+    close.BackgroundColor3 = Color3.fromRGB(30, 42, 59)
+    close.Text = "X"
+    close.Font = Enum.Font.GothamBold
+    close.TextColor3 = Color3.fromRGB(220, 230, 240)
+    close.TextSize = 13
+    close.Parent = header
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 8)
+    closeCorner.Parent = close
+
+    local content = Instance.new("Frame")
+    content.Name = "Content"
+    content.Position = UDim2.fromOffset(14, 56)
+    content.Size = UDim2.new(1, -28, 1, -70)
+    content.BackgroundTransparency = 1
+    content.Parent = main
+
+    local list = Instance.new("UIListLayout")
+    list.Padding = UDim.new(0, 8)
+    list.SortOrder = Enum.SortOrder.LayoutOrder
+    list.Parent = content
+
+    local function makeLabel(name, order, size)
+        local label = Instance.new("TextLabel")
+        label.Name = name
+        label.LayoutOrder = order
+        label.Size = UDim2.new(1, 0, 0, size or 22)
+        label.BackgroundTransparency = 1
+        label.Font = Enum.Font.Gotham
+        label.TextColor3 = Color3.fromRGB(205, 216, 230)
+        label.TextSize = 13
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.TextWrapped = true
+        label.Text = ""
+        label.Parent = content
+        return label
+    end
+
+    local status = makeLabel("Status", 1, 24)
+    status.Font = Enum.Font.GothamBold
+    status.TextColor3 = Color3.fromRGB(97, 213, 255)
+
+    local current = makeLabel("Current", 2, 38)
+    local progressText = makeLabel("ProgressText", 3, 22)
+
+    local barBack = Instance.new("Frame")
+    barBack.Name = "ProgressBack"
+    barBack.LayoutOrder = 4
+    barBack.Size = UDim2.new(1, 0, 0, 12)
+    barBack.BackgroundColor3 = Color3.fromRGB(27, 37, 52)
+    barBack.BorderSizePixel = 0
+    barBack.Parent = content
+
+    local barBackCorner = Instance.new("UICorner")
+    barBackCorner.CornerRadius = UDim.new(1, 0)
+    barBackCorner.Parent = barBack
+
+    local barFill = Instance.new("Frame")
+    barFill.Name = "ProgressFill"
+    barFill.Size = UDim2.new(0, 0, 1, 0)
+    barFill.BackgroundColor3 = Color3.fromRGB(58, 170, 255)
+    barFill.BorderSizePixel = 0
+    barFill.Parent = barBack
+
+    local barFillCorner = Instance.new("UICorner")
+    barFillCorner.CornerRadius = UDim.new(1, 0)
+    barFillCorner.Parent = barFill
+
+    local controls = Instance.new("Frame")
+    controls.Name = "Controls"
+    controls.LayoutOrder = 5
+    controls.Size = UDim2.new(1, 0, 0, 38)
+    controls.BackgroundTransparency = 1
+    controls.Parent = content
+
+    local controlList = Instance.new("UIListLayout")
+    controlList.FillDirection = Enum.FillDirection.Horizontal
+    controlList.Padding = UDim.new(0, 8)
+    controlList.SortOrder = Enum.SortOrder.LayoutOrder
+    controlList.Parent = controls
+
+    local function makeButton(name, text, width, color)
+        local button = Instance.new("TextButton")
+        button.Name = name
+        button.LayoutOrder = name == "Start" and 1 or 2
+        button.Size = UDim2.fromOffset(width, 34)
+        button.BackgroundColor3 = color
+        button.BorderSizePixel = 0
+        button.Font = Enum.Font.GothamBold
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(245, 250, 255)
+        button.TextSize = 13
+        button.Parent = controls
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
+
+        return button
+    end
+
+    local startButton = makeButton("Start", "Start", 118, Color3.fromRGB(34, 139, 86))
+    local stopButton = makeButton("Stop", "Stop", 118, Color3.fromRGB(173, 62, 62))
+    local resetButton = makeButton("Reset", "Reset", 98, Color3.fromRGB(42, 58, 78))
+
+    local speedLabel = makeLabel("SpeedLabel", 6, 18)
+    speedLabel.Text = "Speed"
+    speedLabel.Font = Enum.Font.GothamBold
+    speedLabel.TextColor3 = Color3.fromRGB(235, 242, 250)
+
+    local speedControls = Instance.new("Frame")
+    speedControls.Name = "SpeedControls"
+    speedControls.LayoutOrder = 7
+    speedControls.Size = UDim2.new(1, 0, 0, 34)
+    speedControls.BackgroundTransparency = 1
+    speedControls.Parent = content
+
+    local speedList = Instance.new("UIListLayout")
+    speedList.FillDirection = Enum.FillDirection.Horizontal
+    speedList.Padding = UDim.new(0, 8)
+    speedList.SortOrder = Enum.SortOrder.LayoutOrder
+    speedList.Parent = speedControls
+
+    local speedButtons = {}
+    local speedOptions = {
+        {Name = "Safe", Delay = 1.00},
+        {Name = "Normal", Delay = 0.50},
+        {Name = "Fast", Delay = 0.25},
+        {Name = "Max", Delay = 0.05},
+    }
+
+    for index, option in ipairs(speedOptions) do
+        local button = Instance.new("TextButton")
+        button.Name = option.Name
+        button.LayoutOrder = index
+        button.Size = UDim2.fromOffset(86, 30)
+        button.BackgroundColor3 = Color3.fromRGB(28, 39, 55)
+        button.BorderSizePixel = 0
+        button.Font = Enum.Font.GothamBold
+        button.Text = option.Name
+        button.TextColor3 = Color3.fromRGB(210, 222, 236)
+        button.TextSize = 12
+        button.Parent = speedControls
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = button
+
+        speedButtons[option.Name] = button
+    end
+
+    local stats = makeLabel("Stats", 8, 22)
+    local logTitle = makeLabel("LogTitle", 9, 18)
+    logTitle.Text = "Live log"
+    logTitle.Font = Enum.Font.GothamBold
+    logTitle.TextColor3 = Color3.fromRGB(235, 242, 250)
+
+    local logBox = Instance.new("TextLabel")
+    logBox.Name = "Log"
+    logBox.LayoutOrder = 10
+    logBox.Size = UDim2.new(1, 0, 0, 92)
+    logBox.BackgroundColor3 = Color3.fromRGB(8, 11, 18)
+    logBox.BorderSizePixel = 0
+    logBox.Font = Enum.Font.Code
+    logBox.TextColor3 = Color3.fromRGB(178, 190, 205)
+    logBox.TextSize = 12
+    logBox.TextXAlignment = Enum.TextXAlignment.Left
+    logBox.TextYAlignment = Enum.TextYAlignment.Top
+    logBox.TextWrapped = true
+    logBox.Text = ""
+    logBox.Parent = content
+
+    local logPadding = Instance.new("UIPadding")
+    logPadding.PaddingTop = UDim.new(0, 8)
+    logPadding.PaddingBottom = UDim.new(0, 8)
+    logPadding.PaddingLeft = UDim.new(0, 8)
+    logPadding.PaddingRight = UDim.new(0, 8)
+    logPadding.Parent = logBox
+
+    local logCorner = Instance.new("UICorner")
+    logCorner.CornerRadius = UDim.new(0, 8)
+    logCorner.Parent = logBox
+
+    local dragging = false
+    local dragStart
+    local startPos
+
+    header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    close.MouseButton1Click:Connect(function()
+        screenGui.Enabled = false
+    end)
+
+    local logs = {}
+
+    local api = {}
+    api.StartButton = startButton
+    api.StopButton = stopButton
+    api.ResetButton = resetButton
+    api.SpeedOptions = speedOptions
+    api.SpeedButtons = speedButtons
+
+    function api.SetStatus(text)
+        status.Text = text
+    end
+
+    function api.SetCurrent(text)
+        current.Text = text
+    end
+
+    function api.SetStats(text)
+        stats.Text = text
+    end
+
+    function api.SetProgress(done, total)
+        local ratio = total > 0 and math.clamp(done / total, 0, 1) or 0
+        progressText.Text = "Progress: " .. done .. " / " .. total .. " users"
+        barFill.Size = UDim2.new(ratio, 0, 1, 0)
+    end
+
+    function api.SetIdleProgress()
+        progressText.Text = "Progress: not started"
+        barFill.Size = UDim2.new(0, 0, 1, 0)
+    end
+
+    function api.Log(text)
+        table.insert(logs, 1, os.date("%H:%M:%S") .. "  " .. text)
+
+        while #logs > 6 do
+            table.remove(logs)
+        end
+
+        logBox.Text = table.concat(logs, "\n")
+    end
+
+    function api.ClearLog()
+        table.clear(logs)
+        logBox.Text = ""
+    end
+
+    function api.SetRunning(isRunning)
+        startButton.AutoButtonColor = not isRunning
+        stopButton.AutoButtonColor = isRunning
+        startButton.BackgroundColor3 = isRunning and Color3.fromRGB(38, 73, 57) or Color3.fromRGB(34, 139, 86)
+        stopButton.BackgroundColor3 = isRunning and Color3.fromRGB(173, 62, 62) or Color3.fromRGB(80, 48, 52)
+    end
+
+    function api.SetSpeed(activeName)
+        for _, option in ipairs(speedOptions) do
+            local button = speedButtons[option.Name]
+            if button then
+                if option.Name == activeName then
+                    button.BackgroundColor3 = Color3.fromRGB(58, 170, 255)
+                    button.TextColor3 = Color3.fromRGB(5, 12, 20)
+                else
+                    button.BackgroundColor3 = Color3.fromRGB(28, 39, 55)
+                    button.TextColor3 = Color3.fromRGB(210, 222, 236)
+                end
+            end
+        end
+    end
+
+    api.SetStatus("Ready")
+    api.SetCurrent("Click Start to begin.")
+    api.SetIdleProgress()
+    api.SetStats("Idle")
+    api.SetRunning(false)
+
+    return api
+end
+
+local UI = CreateStatusGui()
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Library = ReplicatedStorage:WaitForChild("Library", 30)
+local Client = Library and Library:WaitForChild("Client", 30)
+
+if not Library or not Client then
+    UI.SetStatus("Load failed")
+    UI.SetCurrent("Library/Client did not load.")
+    UI.Log("Library/Client did not load.")
+    warn("[MAILER] Library/Client did not load.")
+    return
+end
+
+local Network = require(Client:WaitForChild("Network"))
+local Save = require(Client:WaitForChild("Save"))
+
+local function NormalizeName(name)
+    if type(name) ~= "string" then
+        return ""
+    end
+
+    return name:lower():match("^%s*(.-)%s*$")
 end
 
 local function GetFullPetName(petData)
     local variants = {}
+
     if petData.sh then
         table.insert(variants, "Shiny")
     end
+
     if petData.pt == 2 then
         table.insert(variants, "Rainbow")
     elseif petData.pt == 1 then
         table.insert(variants, "Golden")
     end
-    local variantPrefix = ""
+
     if #variants > 0 then
-        variantPrefix = table.concat(variants, " ") .. " "
+        return table.concat(variants, " ") .. " " .. petData.id
     end
-    return variantPrefix .. petData.id
+
+    return petData.id
 end
 
-local function GetPetRAP(petData)
-    if not RAPCmds or not RAPCmds.Get then
-        return 0
-    end
-    local ok, value = pcall(function()
-        return RAPCmds.Get({
-            Class = { Name = "Pet" },
-            IsA = function(InputClass) return InputClass == "Pet" end,
-            GetId = function() return petData.id end,
-            StackKey = function()
-                return HttpService:JSONEncode({
-                    id = petData.id,
-                    sh = petData.sh,
-                    pt = petData.pt,
-                    tn = petData.tn
-                })
-            end,
-            AbstractGetRAP = function()
-                return nil, nil
-            end,
-            GetDefaultRAP = function()
-                return 0
-            end
-        })
-    end)
-    if not ok then
-        return 0
-    end
-    return value or 0
-end
-
-local function Formatint(int)
-    local Suffix = {"", "k", "M", "B", "T", "Qd", "Qn", "Sx", "Sp", "Oc", "No", "De"}
-    local Index = 1
-    while int >= 1000 and Index < #Suffix do
-        int = int / 1000
-        Index = Index + 1
-    end
-    return string.format("%.2f%s", int, Suffix[Index])
-end
-
-local function GetVariantLabel(petData)
-    local variants = {}
-    if petData.sh then
-        table.insert(variants, "Shiny")
-    end
-    if petData.pt == 2 then
-        table.insert(variants, "Rainbow")
-    elseif petData.pt == 1 then
-        table.insert(variants, "Golden")
-    end
-    if #variants == 0 then
-        return "Normal"
-    end
-    return table.concat(variants, " ")
-end
-
-local function NormalizePetId(petId)
-    if type(petId) ~= "string" then
-        return ""
-    end
-    return petId:match("^%s*(.-)%s*$")
-end
-
-local function NormalizeMailName(name)
-    return NormalizePetId(name):lower()
-end
-
-local function GetMailingRules()
+local function GetRules()
     local rules = {}
-    local mailing = Settings and Settings.Mailing
-    if type(mailing) ~= "table" then
-        return rules
-    end
 
-    for petName, rule in pairs(mailing) do
+    for petName, rule in pairs(Settings.Mailing or {}) do
         if type(petName) == "string" and type(rule) == "table" then
             local className = tostring(rule.Class or "Pet"):lower()
-            local amount = math.max(0, math.floor(tonumber(rule.Amount) or 0))
+            local amount = math.max(1, math.floor(tonumber(rule.Amount) or 1))
 
-            if className == "pet" and amount > 0 then
-                rules[NormalizeMailName(petName)] = {
-                    Name = NormalizePetId(petName),
+            if className == "pet" then
+                table.insert(rules, {
+                    Name = petName,
+                    Match = NormalizeName(petName),
                     Amount = amount,
-                    Sent = 0,
-                }
+                })
             end
         end
     end
@@ -347,556 +600,401 @@ local function GetMailingRules()
     return rules
 end
 
-local function GetMatchingMailRule(petData, rules)
-    if not petData or not petData.id then
-        return nil
-    end
+local function WaitForSave(timeout)
+    local start = tick()
 
-    local idMatch = rules[NormalizeMailName(petData.id)]
-    if idMatch then
-        return idMatch
-    end
+    while tick() - start < timeout do
+        local ok, data = pcall(function()
+            return Save.Get()
+        end)
 
-    local fullNameMatch = rules[NormalizeMailName(GetFullPetName(petData))]
-    if fullNameMatch then
-        return fullNameMatch
+        if ok and data and data.Inventory and data.Inventory.Pet then
+            return data
+        end
+
+        task.wait(0.25)
     end
 
     return nil
 end
 
-local function StartsWithIgnoreCase(value, prefix)
-    local v = NormalizePetId(value):lower()
-    local p = prefix:lower()
-    return v:sub(1, #p) == p
+local function GetPet(uid)
+    local saveData = Save.Get()
+    local pets = saveData and saveData.Inventory and saveData.Inventory.Pet
+    return pets and pets[uid] or nil
 end
 
-local function GetPetAsset(petId)
-    local id = NormalizePetId(petId)
-    return (PetsDirectory and PetsDirectory[id]) or nil
+local function GetPetAmount(uid)
+    local pet = GetPet(uid)
+    if not pet then
+        return 0
+    end
+
+    return math.max(1, math.floor(tonumber(pet._am) or 1))
 end
 
-local function AssetHasTier(asset, tierLower)
-    if type(asset) ~= "table" then
+local function MatchesRule(petData, rule)
+    if not petData or not petData.id then
         return false
     end
-    local camel = tierLower:sub(1, 1):upper() .. tierLower:sub(2)
-    if asset[tierLower] == true or asset[camel] == true or asset["is" .. camel] == true or asset["Is" .. camel] == true then
+
+    local baseName = NormalizeName(petData.id)
+    local fullName = NormalizeName(GetFullPetName(petData))
+
+    return rule.Match == baseName or rule.Match == fullName
+end
+
+local function UnlockPet(uid)
+    local pet = GetPet(uid)
+
+    if not pet or not pet._lk then
         return true
     end
-    local stringFields = {
-        asset.rarity,
-        asset.Rarity,
-        asset.tier,
-        asset.Tier,
-        asset.class,
-        asset.Class,
-        asset.category,
-        asset.Category,
-        asset.petType,
-        asset.PetType
-    }
-    for _, value in ipairs(stringFields) do
-        if type(value) == "string" and value:lower():find(tierLower) then
+
+    for attempt = 1, 5 do
+        pcall(function()
+            Network.Invoke("LockingSetLocked", uid, false)
+        end)
+
+        task.wait(0.4)
+
+        pet = GetPet(uid)
+        if pet and not pet._lk then
             return true
         end
     end
+
     return false
 end
 
-local function IsTitanic(petData)
-    if not petData or not petData.id then
-        return false
-    end
-    if StartsWithIgnoreCase(petData.id, "titanic") then
-        return true
-    end
-    return AssetHasTier(GetPetAsset(petData.id), "titanic")
-end
+local function FindStack(rule)
+    local saveData = Save.Get()
+    local pets = saveData and saveData.Inventory and saveData.Inventory.Pet
 
-local function IsHuge(petData)
-    if not petData or not petData.id then
-        return false
+    if not pets then
+        return nil
     end
-    if StartsWithIgnoreCase(petData.id, "huge") then
-        return true
-    end
-    return AssetHasTier(GetPetAsset(petData.id), "huge")
-end
 
-local function GetPetType(petInput)
-    if not petInput then
-        return "Pet"
-    end
-    if type(petInput) == "table" then
-        if IsTitanic(petInput) then
-            return "Titanic"
+    for uid, petData in pairs(pets) do
+        if MatchesRule(petData, rule) then
+            local amount = math.max(1, math.floor(tonumber(petData._am) or 1))
+
+            if amount >= rule.Amount then
+                if UnlockPet(uid) then
+                    local currentPet = GetPet(uid)
+
+                    if currentPet and not currentPet._lk then
+                        return {
+                            UID = uid,
+                            Name = GetFullPetName(currentPet),
+                            Amount = rule.Amount,
+                            BeforeAmount = GetPetAmount(uid),
+                        }
+                    end
+                end
+            else
+                warn("[MAILER] Not enough in stack:", GetFullPetName(petData), amount .. "/" .. rule.Amount)
+            end
         end
-        if IsHuge(petInput) then
-            return "Huge"
-        end
-        return "Pet"
     end
-    if StartsWithIgnoreCase(petInput, "titanic") then
-        return "Titanic"
-    end
-    if StartsWithIgnoreCase(petInput, "huge") then
-        return "Huge"
-    end
-    local asset = GetPetAsset(petInput)
-    if AssetHasTier(asset, "titanic") then
-        return "Titanic"
-    end
-    if AssetHasTier(asset, "huge") then
-        return "Huge"
-    end
-    return "Pet"
-end
 
-local function GetInventoryPet(petUID, fallback)
-    local inventory = Save.Get() and Save.Get().Inventory
-    local pets = inventory and inventory.Pet
-    return (pets and pets[petUID]) or fallback
-end
-
-local function PetExists(petUID)
-    local inventory = Save.Get() and Save.Get().Inventory
-    local pets = inventory and inventory.Pet
-    return pets and pets[petUID] ~= nil
+    return nil
 end
 
 local function NormalizeMailboxResult(result, ...)
-    local extras = { ... }
+    local extras = {...}
+
     if result == true then
         return true
     end
-    if result == false or result == nil then
-        local reason
-        for _, value in ipairs(extras) do
-            if type(value) == "string" and value ~= "" then
-                reason = value
-                break
-            end
-        end
-        return false, reason or "Mailbox returned false"
-    end
-    if type(result) == "string" then
-        return false, result
-    end
+
     if type(result) == "table" then
         if result.success == true or result.Success == true or result[1] == true then
             return true
         end
-        if result.success == false or result.Success == false or result[1] == false then
-            local msg = result.message or result.Message or result.error or result.Error
-            if type(msg) == "string" and msg ~= "" then
-                return false, msg
-            end
-            for _, value in ipairs(extras) do
-                if type(value) == "string" and value ~= "" then
-                    return false, value
-                end
-            end
-            return false, "Mailbox rejected request"
-        end
-        local msg = result.message or result.Message or result.error or result.Error
-        if type(msg) == "string" and msg ~= "" then
-            return false, msg
-        end
-        return true
-    end
-    return false, "Mailbox returned unexpected response"
-end
 
-local function GetAsset(petId, pt)
-    local Asset = PetsDirectory[NormalizePetId(petId)]
-    return Asset and (pt == 1 and Asset.goldenThumbnail or Asset.thumbnail) or "14976456685"
-end
-
-local function GetImageUrl(petData)
-    local assetId = GetAsset(petData.id, petData.pt)
-    return "https://biggamesapi.io/image/" .. assetId:gsub("rbxassetid://", "")
-end
-
-local function UnlockPet(petUID)
-    local maxRetries = 5
-    local success = false
-
-    for attempt = 1, maxRetries do
-        if not Save.Get().Inventory.Pet[petUID]._lk then
-            success = true
-            break -- Pet is already unlocked
-        end
-
-        local unlockSuccess = Network.Invoke("LockingSetLocked", petUID, false)
-        if unlockSuccess then
-            task.wait(0.5) -- Wait to ensure the unlock action is processed
-            if not Save.Get().Inventory.Pet[petUID]._lk then
-                success = true
-                break
-            end
-        end
-        task.wait(1) -- Wait before retrying
-    end
-
-    if success then
-        print("Successfully unlocked", petUID)
-    else
-        warn("Failed to unlock", petUID, "after", maxRetries, "attempts")
-    end
-    return success
-end
-
-local LogProblem
-
-local function CollectPets()
-    local toSend = {}
-    local rules = GetMailingRules()
-    local saveData = Save.Get()
-    local inventory = saveData and saveData.Inventory
-    local pets = inventory and inventory.Pet
-
-    if not pets then
-        return toSend
-    end
-
-    for PetUID, PetData in pairs(pets) do
-        if PetData.id then
-            local rule = GetMatchingMailRule(PetData, rules)
-            if rule and rule.Sent < rule.Amount then
-                local unlockOk = UnlockPet(PetUID)
-                if not unlockOk then
-                    LogProblem("Failed to unlock pet", { Name = GetFullPetName(PetData) })
-                end
-                local currentPet = GetInventoryPet(PetUID, PetData)
-                if currentPet and not currentPet._lk then
-                    local fullPetName = GetFullPetName(currentPet)
-                    local rapValue = GetPetRAP(currentPet)
-                    local stackAmount = math.max(1, math.floor(tonumber(currentPet._am) or 1))
-                    local amountToSend = math.min(stackAmount, rule.Amount - rule.Sent)
-
-                    if amountToSend > 0 then
-                        rule.Sent = rule.Sent + amountToSend
-                        table.insert(toSend, {
-                            UID = PetUID,
-                            Name = fullPetName,
-                            Data = currentPet,
-                            Rap = rapValue,
-                            Amount = amountToSend,
-                        })
-                    end
-                else
-                    warn("Skipping locked pet:", PetUID)
-                    LogProblem("Pet is locked", { Name = GetFullPetName(currentPet or PetData) })
-                end
-            end
+        local message = result.message or result.Message or result.error or result.Error
+        if type(message) == "string" and message ~= "" then
+            return false, message
         end
     end
 
-    return toSend
+    for _, value in ipairs(extras) do
+        if type(value) == "string" and value ~= "" then
+            return false, value
+        end
+    end
+
+    if type(result) == "string" and result ~= "" then
+        return false, result
+    end
+
+    return false, "Mailbox rejected request"
 end
 
-local function AttemptToSendPet(selectedUser, selectedMessage, petData)
-    local lastError
-    local amount = math.max(1, math.floor(tonumber(petData.Amount) or 1))
-    for attempt = 1, 5 do
+local isRunning = false
+local shouldStop = false
+local completedUsers = 0
+local failedUsers = 0
+local totalUsers = #Users
+local nextUserIndex = 1
+
+local function SendPet(recipient, message, petInfo)
+    local lastError = "Unknown error"
+
+    for attempt = 1, MaxRetries do
+        if shouldStop then
+            return false, "Stopped"
+        end
+
+        local beforeAmount = GetPetAmount(petInfo.UID)
+
         local ok, result, result2, result3 = pcall(function()
-            return Network.Invoke("Mailbox: Send", selectedUser, selectedMessage, "Pet", petData.UID, amount)
+            return Network.Invoke("Mailbox: Send", recipient, message, "Pet", petInfo.UID, petInfo.Amount)
         end)
+
         if ok then
             local success, reason = NormalizeMailboxResult(result, result2, result3)
             if success then
                 return true
             end
-            task.wait(0.5)
-            if not PetExists(petData.UID) then
+
+            task.wait(0.6)
+
+            local afterAmount = GetPetAmount(petInfo.UID)
+            if afterAmount <= math.max(0, beforeAmount - petInfo.Amount) then
                 return true
             end
-            lastError = reason or "Mailbox rejected request"
+
+            lastError = reason or lastError
         else
-            lastError = result
+            lastError = tostring(result)
         end
 
-        if petData and petData.Data and IsTitanic(petData.Data) then
-            local ok2, resultA, resultB, resultC = pcall(function()
-                return ReplicatedStorage:WaitForChild("Network")
-                    :WaitForChild("Mailbox: Send")
-                    :InvokeServer(selectedUser, selectedMessage, "Pet", petData.UID, amount)
-            end)
-            if ok2 then
-                local success2, reason2 = NormalizeMailboxResult(resultA, resultB, resultC)
-                if success2 then
-                    return true
-                end
-                task.wait(0.5)
-                if not PetExists(petData.UID) then
-                    return true
-                end
-                lastError = reason2 or lastError
-            else
-                lastError = resultA or lastError
-            end
+        warn("[MAILER] Retry", attempt, "failed for", recipient, "-", lastError)
+        if shouldStop then
+            return false, "Stopped"
         end
-        task.wait(1 + attempt * 0.5)
+        task.wait(0.75 + attempt * 0.25)
     end
+
     return false, lastError
 end
 
-local function GetGemCount()
-    local leaderstats = Player:FindFirstChild("leaderstats")
-    if leaderstats then
-        for _, stat in ipairs(leaderstats:GetChildren()) do
-            if string.lower(stat.Name):find("diamond") then
-                return stat.Value
-            end
-        end
-    end
-    return 0
+local function GetDelay()
+    return math.max(0, tonumber(SendDelay) or 0)
 end
 
-local function GetDiamondUID()
-    local inventory = Save.Get()["Inventory"]
-    if inventory and inventory.Currency then
-        for uid, item in pairs(inventory.Currency) do
-            if item.id == "Diamonds" then
-                return uid
-            end
+local function SleepWithStop(duration)
+    local elapsed = 0
+
+    while elapsed < duration do
+        if shouldStop then
+            return false
         end
+
+        local step = math.min(0.1, duration - elapsed)
+        task.wait(step)
+        elapsed = elapsed + step
     end
-    return nil
+
+    return true
 end
 
-local function AttemptToSendDiamonds(selectedUser, selectedMessage, amount)
-    local lastError
-    for attempt = 1, 5 do
-        local diamondUID = GetDiamondUID()
-        if not diamondUID then
-            return false, "Diamond UID not found"
-        end
-        local ok, result, result2, result3 = pcall(function()
-            return ReplicatedStorage:WaitForChild("Network")
-                :WaitForChild("Mailbox: Send")
-                :InvokeServer(selectedUser, selectedMessage, "Currency", diamondUID, amount)
-        end)
-        if ok then
-            local success, reason = NormalizeMailboxResult(result, result2, result3)
-            if success then
-                return true
-            end
-            lastError = reason or "Mailbox rejected request"
-        else
-            lastError = result
-        end
-        task.wait(1 + attempt * 0.5)
-    end
-    return false, lastError
+local function ResetStats()
+    completedUsers = 0
+    failedUsers = 0
+    shouldStop = false
+    nextUserIndex = 1
+    UI.ClearLog()
+    UI.SetStatus("Ready")
+    UI.SetCurrent("Click Start to begin.")
+    UI.SetIdleProgress()
+    UI.SetStats("Idle")
 end
 
-local function GetMailboxDiamondCost()
-    if type(diamond_fee_cache) == "number" then
-        return diamond_fee_cache
-    end
-
-    if type(Balancing) == "table"
-        and type(Balancing.Constants) == "table"
-        and type(Balancing.Constants.MailboxDiamondCost) == "number" then
-        return Balancing.Constants.MailboxDiamondCost
-    end
-
-    local saveData = Save.Get()
-    local mailbox = saveData and saveData.Mailbox
-    if type(mailbox) == "table" then
-        if type(mailbox.DiamondCost) == "number" then
-            return mailbox.DiamondCost
-        end
-        if type(mailbox.DiamondFee) == "number" then
-            return mailbox.DiamondFee
-        end
-        if type(mailbox.Cost) == "number" then
-            return mailbox.Cost
-        end
-        if type(mailbox.cost) == "number" then
-            return mailbox.cost
-        end
-        for k, v in pairs(mailbox) do
-            if type(k) == "string" and type(v) == "number" then
-                local key = k:lower()
-                if key:find("cost") or key:find("fee") or key:find("tax") then
-                    return v
-                end
-            end
-        end
-    end
-
-    if type(MailboxTypes) == "table" and type(MailboxTypes.DiamondCostCap) == "number" then
-        return MailboxTypes.DiamondCostCap
-    end
-
-    return 0
-end
-
-local function CanAffordMailboxDiamondAmount(amount, fee)
-    amount = math.max(0, math.floor(tonumber(amount) or 0))
-    fee = math.max(0, math.floor(tonumber(fee) or 0))
-
-    if CurrencyCmds and type(CurrencyCmds.CanAfford) == "function" then
-        local ok, canAfford = pcall(function()
-            return CurrencyCmds.CanAfford("Diamonds", fee + amount)
-        end)
-
-        if ok then
-            return canAfford == true
-        end
-    end
-
-    return GetGemCount() >= fee + amount
-end
-
-local function CalculateDiamondSendAmount()
-    local diamondCount = math.max(0, math.floor(tonumber(GetGemCount()) or 0))
-    local keepAmount = math.max(0, math.floor(tonumber(keep_diamonds_amount) or 0))
-    local fee = math.max(0, math.floor(tonumber(GetMailboxDiamondCost()) or 0))
-    local maxPossible = math.max(0, diamondCount - keepAmount - fee)
-
-    if maxPossible <= 0 then
-        return 0, fee, diamondCount
-    end
-
-    if CanAffordMailboxDiamondAmount(maxPossible, fee) then
-        return maxPossible, fee, diamondCount
-    end
-
-    local low = 0
-    local high = maxPossible
-    local best = 0
-
-    while low <= high do
-        local mid = math.floor((low + high) / 2)
-
-        if CanAffordMailboxDiamondAmount(mid, fee) then
-            best = mid
-            low = mid + 1
-        else
-            high = mid - 1
-        end
-    end
-
-    return best, fee, diamondCount
-end
-
-LogProblem = function(reason, petData, recipient, message)
-    local gemCount = GetGemCount()
-    local petName = petData and petData.Name or "n/a"
-    local targetUser = recipient or "n/a"
-    local note = message or "n/a"
-    local details = reason or "Unknown error"
-    local webhookContent = {
-        embeds = {
-            {
-                title = "Mailer Issue",
-                description = "A mailbox action failed.",
-                color = 0xE03131,
-                fields = {
-                    { name = "User", value = "`" .. Player.Name .. "`", inline = true },
-                    { name = "Target", value = "`" .. targetUser .. "`", inline = true },
-                    { name = "Pet", value = "`" .. petName .. "`", inline = false },
-                    { name = "Message", value = "`" .. note .. "`", inline = false },
-                    { name = "Diamonds", value = "`" .. Formatint(gemCount) .. "`", inline = true },
-                    { name = "Reason", value = "`" .. details .. "`", inline = false }
-                },
-                footer = { text = "Auto Mailer" },
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-            }
-        }
-    }
-    SendWebhookLog(webhookContent, ProblemsWebhook)
-end
-
-local function LogSuccess(petData, recipient, message, diamondsSent)
-    if not SuccessWebhook or SuccessWebhook == "" then
+local function RunMailer()
+    if isRunning then
+        UI.Log("Already running.")
         return
     end
-    local petName = petData and petData.Name or "n/a"
-    local petInfo = petData and petData.Data or nil
-    local rapValue = petData and petData.Rap or (petInfo and GetPetRAP(petInfo) or 0)
-    local imgUrl = petInfo and GetImageUrl({ id = petInfo.id, pt = petInfo.pt }) or nil
-    local variant = petInfo and GetVariantLabel(petInfo) or "n/a"
-    local petType = petInfo and GetPetType(petInfo) or "Pet"
-    local hasPet = petInfo ~= nil
-    local webhookContent = {
-        embeds = {
-            {
-                title = "Mailbox Delivery",
-                description = hasPet and "A pet was sent successfully via mailbox." or "Diamonds were sent successfully via mailbox.",
-                color = 0x2F9E44,
-                thumbnail = imgUrl and { url = imgUrl } or nil,
-                fields = {
-                    { name = "Sender", value = "`" .. Player.Name .. "`", inline = true },
-                    { name = "Recipient", value = "`" .. (recipient or "n/a") .. "`", inline = true },
-                    { name = "Pet", value = hasPet and "`" .. petName .. "`" or "`n/a`", inline = false },
-                    { name = "Type", value = hasPet and "`" .. petType .. "`" or "`n/a`", inline = true },
-                    { name = "Variant", value = hasPet and "`" .. variant .. "`" or "`n/a`", inline = true },
-                    { name = "RAP", value = hasPet and (rapValue > 0 and "`" .. Formatint(rapValue) .. "`" or "`n/a`") or "`n/a`", inline = true },
-                    { name = "Diamonds Sent", value = diamondsSent and "`" .. Formatint(diamondsSent) .. "`" or "`n/a`", inline = true },
-                    { name = "Diamonds", value = "`" .. Formatint(GetGemCount()) .. "`", inline = true },
-                    { name = "Pet UID", value = petData and petData.UID and "`" .. tostring(petData.UID) .. "`" or "`n/a`", inline = true },
-                    { name = "Message", value = "`" .. (message or "n/a") .. "`", inline = false }
-                },
-                footer = { text = "Auto Mailer" },
-                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
-            }
-        }
-    }
-    SendWebhookLog(webhookContent, SuccessWebhook)
-end
 
-while true do
-    for _, selectedUser in ipairs(usernames) do
-        local PetsToSend = CollectPets()
-        if #PetsToSend == 0 then
-            warn("[MAILER] No matching pets left to send.")
-            break
+    isRunning = true
+    shouldStop = false
+    UI.SetRunning(true)
+
+    if nextUserIndex > totalUsers then
+        UI.SetStatus("Finished")
+        UI.SetCurrent("Already finished. Press Reset to run again.")
+        UI.SetProgress(totalUsers, totalUsers)
+        UI.SetStats("Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+        UI.Log("Already finished. Reset to start over.")
+        UI.SetRunning(false)
+        isRunning = false
+        return
+    end
+
+    UI.SetStatus("Loading")
+    UI.SetCurrent("Loading save data...")
+    UI.SetProgress(completedUsers + failedUsers, totalUsers)
+    UI.SetStats("Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+    UI.Log("Start clicked. Resuming at user " .. nextUserIndex .. "/" .. totalUsers)
+
+    local saveData = WaitForSave(30)
+    if shouldStop then
+        UI.SetStatus("Stopped")
+        UI.SetCurrent("Stopped before mailing.")
+        UI.SetRunning(false)
+        isRunning = false
+        return
+    end
+
+    if not saveData then
+        UI.SetStatus("Load failed")
+        UI.SetCurrent("Save data did not load.")
+        UI.Log("Save data did not load.")
+        UI.SetRunning(false)
+        isRunning = false
+        warn("[MAILER] Save data did not load.")
+        return
+    end
+
+    local rules = GetRules()
+    if #rules == 0 then
+        UI.SetStatus("Config issue")
+        UI.SetCurrent("No pet mailing rules configured.")
+        UI.Log("No pet mailing rules configured.")
+        UI.SetRunning(false)
+        isRunning = false
+        warn("[MAILER] No pet mailing rules configured.")
+        return
+    end
+
+    UI.SetStatus("Running")
+    UI.SetCurrent("Starting one-time mailing pass...")
+    UI.Log("Loaded. Speed delay: " .. tostring(GetDelay()) .. "s")
+
+    for index = nextUserIndex, totalUsers do
+        local recipient = Users[index]
+
+        if shouldStop then
+            UI.SetStatus("Stopped")
+            UI.SetCurrent("Paused at user " .. nextUserIndex .. "/" .. totalUsers .. ". Click Start to resume.")
+            UI.Log("Paused. Next user: " .. tostring(Users[nextUserIndex] or "done"))
+            UI.SetRunning(false)
+            isRunning = false
+            return
         end
 
-        local selectedMessage = messages[math.random(1, #messages)]
+        local message = Messages[math.random(1, #Messages)]
+        UI.SetStatus("Mailing")
+        UI.SetCurrent("User " .. index .. "/" .. totalUsers .. ": " .. recipient)
+        UI.Log("Preparing " .. recipient)
 
-        for _, petData in ipairs(PetsToSend) do
-            local success, err = AttemptToSendPet(selectedUser, selectedMessage, petData)
+        for _, rule in ipairs(rules) do
+            if shouldStop then
+                UI.SetStatus("Stopped")
+                UI.SetCurrent("Paused at user " .. nextUserIndex .. "/" .. totalUsers .. ". Click Start to resume.")
+                UI.Log("Paused. Next user: " .. tostring(Users[nextUserIndex] or "done"))
+                UI.SetRunning(false)
+                isRunning = false
+                return
+            end
+
+            local petInfo = FindStack(rule)
+
+            if not petInfo then
+                UI.SetStatus("Stopped")
+                UI.SetCurrent("No stack with " .. rule.Amount .. " " .. rule.Name .. " left.")
+                UI.Log("Stopped: not enough " .. rule.Name)
+                UI.SetRunning(false)
+                isRunning = false
+                warn("[MAILER] Stopping. No stack with", rule.Amount, rule.Name, "left.")
+                return
+            end
+
+            UI.SetCurrent("Sending " .. petInfo.Amount .. " " .. petInfo.Name .. " to " .. recipient)
+            local success, err = SendPet(recipient, message, petInfo)
+
             if success then
-                LogSuccess(petData, selectedUser, selectedMessage)
+                completedUsers = completedUsers + 1
+                nextUserIndex = index + 1
+                UI.SetProgress(completedUsers + failedUsers, totalUsers)
+                UI.SetStats("Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+                UI.Log("Sent " .. petInfo.Amount .. " to " .. recipient)
+                print("[MAILER] Sent", petInfo.Amount, petInfo.Name, "to", recipient)
+            elseif err == "Stopped" then
+                UI.SetStatus("Stopped")
+                UI.SetCurrent("Paused at user " .. nextUserIndex .. "/" .. totalUsers .. ". Click Start to resume.")
+                UI.Log("Paused. Next user: " .. tostring(Users[nextUserIndex] or "done"))
+                UI.SetRunning(false)
+                isRunning = false
+                return
             else
-                local reason = err and tostring(err) or "Unknown error"
-                LogProblem("Mailbox send failed: " .. reason, petData, selectedUser, selectedMessage)
+                failedUsers = failedUsers + 1
+                nextUserIndex = index + 1
+                UI.SetProgress(completedUsers + failedUsers, totalUsers)
+                UI.SetStats("Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+                UI.Log("Failed " .. recipient .. ": " .. tostring(err))
+                warn("[MAILER] Failed to send", petInfo.Name, "to", recipient, "-", err)
             end
 
-            if send_delay > 0 then
-                task.wait(send_delay)
+            if GetDelay() > 0 and not SleepWithStop(GetDelay()) then
+                UI.SetStatus("Stopped")
+                UI.SetCurrent("Paused at user " .. nextUserIndex .. "/" .. totalUsers .. ". Click Start to resume.")
+                UI.Log("Paused. Next user: " .. tostring(Users[nextUserIndex] or "done"))
+                UI.SetRunning(false)
+                isRunning = false
+                return
             end
         end
     end
 
-    if Settings.MailDiamonds == true and keep_diamonds_amount >= 0 then
-        local diamondTarget = usernames[math.random(1, #usernames)]
-        local diamondMessage = messages[math.random(1, #messages)]
-        local diamondToSend, _, diamondCount = CalculateDiamondSendAmount()
-
-        if diamondToSend >= min_diamonds_to_send then
-            local diamondLabel = "Diamonds (" .. Formatint(diamondToSend) .. ")"
-            local beforeSend = diamondCount
-            local diamondSuccess, diamondErr = AttemptToSendDiamonds(diamondTarget, diamondMessage, diamondToSend)
-            if not diamondSuccess then
-                local reason = diamondErr and tostring(diamondErr) or "Unknown error"
-                LogProblem("Diamond mail failed: " .. reason, { Name = diamondLabel }, diamondTarget, diamondMessage)
-            else
-                task.wait(1)
-                local afterSend = GetGemCount()
-                local actualFee = beforeSend - diamondToSend - afterSend
-                if actualFee >= 0 then
-                    diamond_fee_cache = actualFee
-                end
-                LogSuccess(nil, diamondTarget, diamondMessage, diamondToSend)
-            end
-        end
-    end
-    task.wait(35)
+    UI.SetStatus("Finished")
+    UI.SetCurrent("Done. Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+    UI.SetProgress(totalUsers, totalUsers)
+    UI.SetStats("Sent: " .. completedUsers .. " | Failed: " .. failedUsers)
+    UI.Log("Finished one-time pass.")
+    nextUserIndex = totalUsers + 1
+    UI.SetRunning(false)
+    isRunning = false
+    print("[MAILER] Finished one-time mailing pass.")
 end
+
+UI.StartButton.MouseButton1Click:Connect(function()
+    task.spawn(RunMailer)
+end)
+
+UI.StopButton.MouseButton1Click:Connect(function()
+    if isRunning then
+        shouldStop = true
+        UI.SetStatus("Stopping")
+        UI.SetCurrent("Stopping after the current mailbox call...")
+        UI.Log("Stop clicked.")
+    else
+        UI.Log("Not running.")
+    end
+end)
+
+UI.ResetButton.MouseButton1Click:Connect(function()
+    if isRunning then
+        UI.Log("Stop before resetting.")
+        return
+    end
+
+    ResetStats()
+end)
+
+for _, option in ipairs(UI.SpeedOptions) do
+    local button = UI.SpeedButtons[option.Name]
+    if button then
+        button.MouseButton1Click:Connect(function()
+            SendDelay = option.Delay
+            UI.SetSpeed(option.Name)
+            UI.Log("Speed set to " .. option.Name .. " (" .. tostring(option.Delay) .. "s)")
+        end)
+    end
+end
+
+UI.SetSpeed("Fast")
+ResetStats()
