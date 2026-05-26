@@ -1,0 +1,270 @@
+getgenv().Config = {
+    Usernames = [[
+elihyperglitch2022
+willowshadowcircuit2
+gabrielvoidalpha20
+hazerider2004yt
+moonbeastflame200642
+primalmax201450
+flickslimedawn2006
+omegabuilder202489
+bytenovabladeyt
+ultraalphaspark35yt
+rocketgolden201576
+builderskyice2002
+lavalegendmagic2008
+hazelriftcrystal2003
+pulsewolf200828
+emmasaber200621
+goldenriftblade2017
+liamlucky44yt
+jacksonic200533
+masongamer201932yt
+arrowomega200276
+queensonicclaw200353
+ravencodeultra83yt
+firepulsenova2022yt
+zerosparkhawk2009
+gamerpandaarrow44
+jellycookie94yt
+blockspark200214
+voidhawkarrowyt
+chloegigablade2011
+neonflashcookie2016
+jacksondriftgamer95
+profrostshadowyt
+crystalrocket202462
+baneechofrost38
+ethanwolfvenom2006
+knightflash201352
+raventoxic201280
+duckzeroeagle2019
+willowvortex202073
+gigavenomwraith37
+slimerift200453
+ravenvortexpixel51
+ethanmasterminer86
+willowroguelava79
+thundergiga201876
+starrystream2024yt
+prismaquaqueen2010
+sabercode2010yt
+avaprimaleagle2002
+sebastianclawghostyt
+blastblockraven2023
+sonicknightorbit2012
+gigazerorider2008
+addisonplayz2008yt
+hannahprismclaw2015
+flamewraithbearyt
+banestar200292
+aidenpoweromega2010
+neonthunderpower2022
+lavalionomega58yt
+prohawk200696
+dawnfrostflash2012
+abigailturbo200485
+cartergolden200646
+goldenturbopro85
+chillfuryprimal60
+neonace202370
+dawnaquaeagle2016
+ellietigerminer2006
+eliprism19yt
+ameliabeastlightyt
+venomnightaqua2019
+ninjaclaw2011yt
+pixelateddancer20115
+elijahhunter201972
+zapvortexghost2011
+hunterblazeminer2016
+prismepicmaster2005
+emmavoid201553
+blastqueenphoenix36
+iceghostecho2002
+stormroguebeast66
+eaglechasepro58
+henrybaconaqua2017
+frostriderraven2015
+starvortexsaber2012
+julianpulse202186
+turbomysticfury2022
+harperturbo201649
+ameliainferno201047y
+crystalkingfoxyt
+epicsilverclaw2015
+samuelminerdrift2005
+codedancerbyte2007
+acenightorbit46
+blazeice202246
+cookiecrafthero2020
+ravenstormy50
+powerstarrymaxyt
+powermysticpulse2023
+ultramagicpixelatedy
+graceomegalucky89
+victorialegend200571
+laylaroguemoon63
+omegaflick39yt
+firecrystalfrost93
+willowpandamax2016
+cookieflame201961
+loganknight202046
+cyberfireminer201020
+skyslime202472
+proiceskateryt
+bytecrystal200756
+wyattvortex77yt
+gabrielstorm202433
+bladecyber202391
+norapro200715
+crystalarrownova72
+omegaplayzthunder20
+goldengamer200251
+moonalpharocketyt
+sophiahyperchaos11yt
+miaknightsilver55
+aubreylavalion2019
+nightaquaorbit39
+maxzoom201979
+oliviahyperhaze2005
+samuelshadow201641
+chloeknightice2011
+olivialuckyice85
+miarocketultra2006
+saberhyperhunter79
+fusionriderfury79
+aurorablazewraith79
+flickcrystalfrost202
+heroghost202220
+ridermoondark2019
+isabellaflamemax2018
+moonstarnova47
+emmaeagle202173
+omegastreamturbo43
+legendstreamshadow20
+buildermaxmineryt
+rocketbuildersonic27
+brooklyngamerstarry3
+williammasterdragon9
+zaydenwolffury32
+jameslightlegendyt
+jellyrocketcookie23
+]]
+}
+
+local Config = getgenv().Config
+
+local users = {}
+for username in Config.Usernames:gmatch("[^\r\n]+") do
+    username = username:gsub("^%s+", ""):gsub("%s+$", "")
+    if username ~= "" then
+        table.insert(users, username)
+    end
+end
+
+Config.Usernames = users
+
+Config.PetsToSend = {
+    ["Blooming Axolotl"] = {
+        Normal = 0,
+        Gold = 0,
+        Rainbow = 50,
+        Shiny = 0,
+        GS = 0,
+        RS = 0
+    }
+}
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local MailboxRemote = ReplicatedStorage:WaitForChild("Network"):WaitForChild("Mailbox: Send")
+local SaveData = require(ReplicatedStorage.Library.Client.Save)
+
+local messages = {"Thanks!", "Enjoy!", "Take this!", "Here you go!", "Hope you like it!"}
+local PetUIDs = {}
+
+local function getRandomMessage()
+    return messages[math.random(1, #messages)]
+end
+
+local function fetchPetUIDs()
+    table.clear(PetUIDs)
+
+    local save = SaveData.Get()
+    if not save or not save.Inventory or not save.Inventory.Pet then
+        return
+    end
+
+    for petName, variants in pairs(Config.PetsToSend) do
+        PetUIDs[petName] = {}
+        for variant in pairs(variants) do
+            PetUIDs[petName][variant] = {}
+        end
+    end
+
+    for uid, pet in pairs(save.Inventory.Pet) do
+        if PetUIDs[pet.id] then
+            local variant = "Normal"
+
+            if pet.pt == 1 then
+                variant = "Gold"
+            elseif pet.pt == 2 then
+                variant = "Rainbow"
+            end
+
+            if pet.sh then
+                if pet.pt == 1 then
+                    variant = "GS"
+                elseif pet.pt == 2 then
+                    variant = "RS"
+                else
+                    variant = "Shiny"
+                end
+            end
+
+            if PetUIDs[pet.id][variant] then
+                table.insert(PetUIDs[pet.id][variant], {
+                    uid = uid,
+                    amount = pet._am or 1
+                })
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while true do
+        fetchPetUIDs()
+
+        for petName, variants in pairs(Config.PetsToSend) do
+            for variant, reqAmount in pairs(variants) do
+                local pets = PetUIDs[petName] and PetUIDs[petName][variant]
+
+                if reqAmount > 0 and pets and #pets >= reqAmount then
+                    local sent = 0
+
+                    for _, petData in ipairs(pets) do
+                        if sent >= reqAmount then
+                            break
+                        end
+
+                        local user = Config.Usernames[math.random(1, #Config.Usernames)]
+
+                        MailboxRemote:InvokeServer(
+                            user,
+                            getRandomMessage(),
+                            "Pet",
+                            petData.uid,
+                            petData.amount
+                        )
+
+                        sent += 1
+                        task.wait(0.25)
+                    end
+                end
+            end
+        end
+
+        task.wait(5)
+    end
+end)
